@@ -9,6 +9,7 @@ import { fetchImages } from './js/api';
 let page = 1;
 let searchQuery = '';
 
+
 // FUNCTIONS
 // Функція отправки даних на Pixabay
 const onSubmit = async evt => {
@@ -17,17 +18,24 @@ const onSubmit = async evt => {
   searchQuery = evt.target.elements.query.value;
   // Скидаємо сторінку
   page = 1;
+  
   // Очищуємо галерею
   refs.galleryContainer.innerHTML = '';
   // Створити запит
   try {
     const request = await fetchImages(searchQuery, page);
+    if (request.totalHits > 40) {
+      refs.loadMoreBtn.classList.remove('is-hidden');
+    } else {
+      refs.loadMoreBtn.classList.add('is-hidden');
+    }
     // Відмальовуємо розмітку
     renderMarkup(request.hits, refs.galleryContainer);
   } catch (error) {
     console.error(error);
   }
-
+ 
+ 
   // Очищуємо форму
   evt.target.reset();
 };
@@ -38,12 +46,14 @@ const onLoadMore = async () => {
 
   try {
     const request = await fetchImages(searchQuery, page);
+    if (page === Math.ceil(request.totalHits / 40)) {refs.loadMoreBtn.classList.add('is-hidden')};
     // Відмальовуємо розмітку
     renderMarkup(request.hits, refs.galleryContainer);
   } catch (error) {
     console.error(error);
   }
 };
+
 
 // LISTENERS
 refs.searchForm.addEventListener('submit', onSubmit);
